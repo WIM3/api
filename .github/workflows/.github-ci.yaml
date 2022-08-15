@@ -1,0 +1,91 @@
+name: Build and Deploy to EKS
+
+on:
+  push:
+    branches:
+      - main
+      # - dev
+
+env:
+  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+  STAGE_KUBE_CLUSTER_NAME: ${{ secrets.STAGE_KUBE_CLUSTER_NAME }}
+  PRODUCTION_KUBE_CLUSTER_NAME: ${{ secrets.PRODUCTION_KUBE_CLUSTER_NAME }}
+  KUBE_NAMSPACE: ${{ secrets.KUBE_NAMSPACE }}
+  STAGE_CHART_REGISTRY: ${{ secrets.STAGE_CHART_REGISTRY }}
+  PRODUCTION_CHART_REGISTRY: ${{ secrets.PRODUCTION_CHART_REGISTRY }}
+  ECR_REPOSITORY: infinix/api
+  DEPLOYMENT_NAME: "infinix-api"
+
+jobs:
+  build:
+    name: Build
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: eu-central-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR - DEV
+        if: ${{ github.ref == 'refs/heads/dev' }}
+        env:
+          IMAGE_TAG: dev-${{ github.run_number }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Build, tag, and push image to Amazon ECR - PRODUCTION
+        if: ${{ github.ref == 'refs/heads/master' }}
+        env:
+          IMAGE_TAG: production-${{ github.run_number }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: eu-central-1
+
+      - name: Deploy - DEV
+        if: ${{ github.ref == 'refs/heads/dev' }}
+        env:
+          IMAGE_TAG: dev-${{ github.run_number }}
+          CHART_NAME: dev-chart
+        run: |
+          aws eks update-kubeconfig --name $STAGE_KUBE_CLUSTER_NAME
+          helm subenv -f ./k8s/dev.yaml
+          helm repo add $CHART_NAME $STAGE_CHART_REGISTRY
+          helm repo update $CHART_NAME
+          helm template $DEPLOYMENT_NAME $CHART_NAME/advancedblockchain -n $KUBE_NAMSPACE -f ./k8s/dev.yaml
+          helm upgrade -i $DEPLOYMENT_NAME $CHART_NAME/advancedblockchain -n $KUBE_NAMSPACE -f ./k8s/dev.yaml
+
+      - name: Deploy - PRODUCTION
+        if: ${{ github.ref == 'refs/heads/master' }}
+        env:
+          IMAGE_TAG: production-${{ github.run_number }}
+          CHART_NAME: production-chart
+        run: |
+          aws eks update-kubeconfig --name $PRODUCTION_KUBE_CLUSTER_NAME
+          helm subenv -f ./k8s/production.yaml
+          helm repo add $CHART_NAME $PRODUCTION_CHART_REGISTRY
+          helm repo update $CHART_NAME
+          helm template $DEPLOYMENT_NAME $CHART_NAME/advancedblockchain -n $KUBE_NAMSPACE -f ./k8s/production.yaml
+          helm upgrade -i $DEPLOYMENT_NAME $CHART_NAME/advancedblockchain -n $KUBE_NAMSPACE -f ./k8s/production.yaml

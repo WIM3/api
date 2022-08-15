@@ -1,0 +1,31 @@
+deployment:
+  enabled: true
+  containerPort: 8080
+
+image:
+  repository: $ECR_REGISTRY/$ECR_REPOSITORY
+  tag: $IMAGE_TAG
+
+env:
+  PORT: "8080"
+  AWS_REGION: eu-central-1
+  ENVIRONMENT: prod
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 80
+
+ingress:
+  tls: false
+  enabled: true
+  host: api.infinix.finance
+  path: "/"
+
+resources:
+  limits:
+    cpu: 4
+    memory: 4Gi
+  requests:
+    cpu: 1
+    memory: 1Gi
