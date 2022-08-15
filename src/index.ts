@@ -1,6 +1,5 @@
-import express, { Request, Response } from "express";
+import { Server } from "socket.io";
 import * as dynamoose from "dynamoose";
-import cors from "cors";
 
 import { logger } from "./common/logger";
 import { EVM, PORT, AWS_CONFIG } from "./common/constants";
@@ -14,23 +13,14 @@ const ddb = new dynamoose.aws.sdk.DynamoDB(
 );
 dynamoose.aws.ddb.set(ddb);
 
-// setting up express
-const app = express();
+// setting up socket io server
+const io = new Server({ cors: { origin: "*" } });
 
 /* Application core */
 
-app.use(express.json());
-
-app.use(
-  cors({
-    origin: "*",
-  })
-);
-
-app.get("/markets/all", async (_req: Request, res: Response) => {
-  res.setHeader("Content-Type", "application/json");
-  res.json(getMarkets());
-  res.status(200);
+io.on("connection", (socket) => {
+  socket.emit("markets", getMarkets());
 });
 
-app.listen(PORT, () => logger.info(`Listening on port ${PORT}`));
+io.listen(PORT);
+logger.info(`Listening on port ${PORT}`);

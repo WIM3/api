@@ -12,6 +12,6 @@
 - `ACCESS_KEY_ID` - only used for testing if you want to use access `DB` on a different `AWS` environment, optional
 - `SECRET_ACCESS_KEY` - only used for testing if you want to use access `DB` on a different `AWS` environment, optional
 
-### Endpoints
+### Socket.io messages
 
-- `/markets/all` - get all market information
+- `markets` - sends all market and pair information
