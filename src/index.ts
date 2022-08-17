@@ -1,10 +1,12 @@
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import * as dynamoose from "dynamoose";
 
 import { logger } from "./common/logger";
-import { EVM, PORT, AWS_CONFIG } from "./common/constants";
-// import { sleep } from "common/utils";
-import { getMarkets } from "./services/fetchMarkets";
+import { EVM, PORT, AWS_CONFIG, RELOAD_RATE, STOP } from "./common/constants";
+import { sleep } from "./common/utils";
+
+import { getMarketsFromJson as fetchMarkets, getMarkets } from "./services/fetchMarkets";
+import { run as runAmms, getAmm } from "./services/fetchAmms";
 
 /* Initial setup */
 
@@ -17,23 +19,44 @@ dynamoose.aws.ddb.set(ddb);
 // setting up socket io server
 const io = new Server({ cors: { origin: "*" } });
 
+/* Helper functions */
+
+// TODO: needs to be adjusted and extended
+const getMarketInfo = (amm: string): string => {
+  const priceKey = getAmm(amm)?.priceFeedKey;
+  return priceKey || "";
+};
+
+// TODO: needs to be investigated if this is the best way to handle communication
+const addListener = (socket: Socket, channel: string, getResponse: (arg: string) => any) => {
+  socket.on(channel, async (arg) => {
+    let active = arg !== STOP;
+    let prev;
+
+    socket.on(channel, () => {
+      active = false;
+    });
+
+    while (active) {
+      const current = getResponse(arg);
+      if (current !== prev) {
+        socket.emit(channel, current);
+        prev = current;
+      }
+      await sleep(RELOAD_RATE);
+    }
+  });
+};
+
 /* Application core */
 
 io.on("connection", (socket) => {
   socket.emit("markets", getMarkets());
 
-  // TODO: needs to be investigated how to handle closing active listenings
-  /* socket.on("user-positions", async (arg) => {
-    let active = true;
-    while (active) {
-      socket.on("user-positions", (_arg) => {
-        active = false;
-      })
-      socket.emit('user-positions', getUserPositions());
-      await sleep(3000);
-    }
-  })*/
+  addListener(socket, "market_info", getMarketInfo);
 });
 
+fetchMarkets();
+runAmms();
 io.listen(PORT);
 logger.info(`Listening on port ${PORT}`);
