@@ -10,7 +10,6 @@
     "dotenv": "^16.0.1",
     "dynamoose": "^2.8.5",
     "ethers": "^5.4.5",
-    "ethers-multicall": "^0.2.3",
     "log4js": "^6.3.0",
     "nodemon": "^2.0.12",
     "socket.io": "^4.5.1"

@@ -4,6 +4,7 @@ import * as dynamoose from "dynamoose";
 import { logger } from "./common/logger";
 import { EVM, PORT, AWS_CONFIG, RELOAD_RATE, STOP } from "./common/constants";
 import { sleep } from "./common/utils";
+import { fetchPrice } from "./blockchain/client";
 
 import { getMarketsFromJson as fetchMarkets, getMarkets } from "./services/fetchMarkets";
 import { run as runAmms, getAmm } from "./services/fetchAmms";
@@ -22,23 +23,37 @@ const io = new Server({ cors: { origin: "*" } });
 /* Helper functions */
 
 // TODO: needs to be adjusted and extended
-const getMarketInfo = (amm: string): string => {
+const getMarketInfo = async (amm: string): Promise<string> => {
   const priceKey = getAmm(amm)?.priceFeedKey;
-  return priceKey || "";
+  if (priceKey) {
+    return await fetchPrice(priceKey);
+  }
+  throw `Amm ${amm} not found`;
 };
 
 // TODO: needs to be investigated if this is the best way to handle communication
-const addListener = (socket: Socket, channel: string, getResponse: (arg: string) => any) => {
+const addListener = (
+  socket: Socket,
+  channel: string,
+  getResponse: (arg: string) => Promise<any>
+) => {
   socket.on(channel, async (arg) => {
     let active = arg !== STOP;
     let prev;
 
+    // stopping live feed
+    socket.on("disconnect", () => {
+      active = false;
+    });
     socket.on(channel, () => {
       active = false;
     });
 
     while (active) {
-      const current = getResponse(arg);
+      const current = await getResponse(arg).catch((e) => {
+        logger.error(e);
+        socket.emit(channel, e);
+      });
       if (current !== prev) {
         socket.emit(channel, current);
         prev = current;

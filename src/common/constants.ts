@@ -1,3 +1,4 @@
+import { ethers } from "ethers";
 import * as dotenv from "dotenv";
 
 dotenv.config();
@@ -9,12 +10,23 @@ export const AWS_CONFIG = {
   accessKeyId: process.env.ACCESS_KEY_ID || "",
   secretAccessKey: process.env.SECRET_ACCESS_KEY || "",
 };
-export const RELOAD_RATE = process.env.RELOAD_RATE ? +process.env.RELOAD_RATE : 3600;
+export const RELOAD_RATE = process.env.RELOAD_RATE ? +process.env.RELOAD_RATE : 36000;
 
 export const STOP = "STOP";
 export const SUBGRAPH_LIMIT = 1000;
-export const SUBGRAPH_FREQUENCY = 3600;
+export const SUBGRAPH_FREQUENCY = 36000;
+
+export const PROVIDER =
+  EVM === "prod"
+    ? new ethers.providers.StaticJsonRpcProvider(
+        `https://avalanche-mainnet.infura.io/v3/${process.env.PROVIDER_KEY}`
+      )
+    : new ethers.providers.StaticJsonRpcProvider(
+        `https://avalanche-fuji.infura.io/v3/${process.env.PROVIDER_KEY}`
+      );
 export const SUBGRAPH_URL =
   EVM === "prod"
     ? "TODO"
     : "https://api.thegraph.com/subgraphs/name/infinix-finance/dev-fuji-positions";
+export const API3_PRICE_FEED =
+  EVM === "prod" ? "TODO" : "0x795036637AeB61359F1435C66117A371A433C174";
