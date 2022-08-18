@@ -17,4 +17,4 @@
 ### Socket.io messages
 
 - `markets` - sends all market and pair information
-- `market_info` - ... (in progress)
+- `amm_info` - ... (in progress)

@@ -8,6 +8,7 @@ export interface Amm {
   id: string;
   priceFeedKey: string;
   fundingPeriod: number;
+  price: number;
 }
 
 export interface DefaultModelResponse {

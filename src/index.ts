@@ -3,8 +3,8 @@ import * as dynamoose from "dynamoose";
 
 import { logger } from "./common/logger";
 import { EVM, PORT, AWS_CONFIG, RELOAD_RATE, STOP } from "./common/constants";
+import { Amm } from "./common/types";
 import { sleep } from "./common/utils";
-import { fetchPrice } from "./blockchain/client";
 
 import { getMarketsFromJson as fetchMarkets, getMarkets } from "./services/fetchMarkets";
 import { run as runAmms, getAmm } from "./services/fetchAmms";
@@ -22,13 +22,10 @@ const io = new Server({ cors: { origin: "*" } });
 
 /* Helper functions */
 
-// TODO: needs to be adjusted and extended
-const getMarketInfo = async (amm: string): Promise<string> => {
-  const priceKey = getAmm(amm)?.priceFeedKey;
-  if (priceKey) {
-    return await fetchPrice(priceKey);
-  }
-  throw `Amm ${amm} not found`;
+const getAmmInfo = async (amm: string): Promise<Amm> => {
+  const ammInfo = getAmm(amm);
+  if (!ammInfo) throw `Amm ${amm} not found`;
+  return ammInfo;
 };
 
 // TODO: needs to be investigated if this is the best way to handle communication
@@ -68,7 +65,7 @@ const addListener = (
 io.on("connection", (socket) => {
   socket.emit("markets", getMarkets());
 
-  addListener(socket, "market_info", getMarketInfo);
+  addListener(socket, "amm_info", getAmmInfo);
 });
 
 fetchMarkets();

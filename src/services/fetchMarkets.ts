@@ -5,6 +5,7 @@ import { Markets } from "../common/types";
 import { logger } from "../common/logger";
 
 // TODO: remove after testing
+// based on this - https://github.com/bbenligiray/data-feed-reader-example/tree/avalanche-testnet#dapi-names
 const mockData = {
   contracts: {
     InsuranceFund: "0x8C29F6F7fc1999aB84b476952E986F974Acb3824",
@@ -17,13 +18,14 @@ const mockData = {
         AVAXUSDC: "0x0",
       },
       "S&P Platts": {
-        $lb: "0x0",
-        $mt: "0x0",
-        $mtCO2e: "0x0",
+        BATCH04: "0x0",
+        BATCP04: "0x0",
+        CNCAD00: "0x0",
+        ACRCA00: "0x0",
       },
       "S&P Indices": {
-        SPBTCUSDC: "0x0",
-        SPETHUSDC: "0x0",
+        "Bitcoin Index": "0x0",
+        "Ethereum Index": "0x0",
       },
     },
   },

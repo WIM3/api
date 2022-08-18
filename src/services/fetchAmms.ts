@@ -3,6 +3,8 @@ import axios from "axios";
 import { SUBGRAPH_LIMIT, SUBGRAPH_FREQUENCY, SUBGRAPH_URL } from "../common/constants";
 import { Amm } from "../common/types";
 import { sleep } from "../common/utils";
+import { logger } from "../common/logger";
+import { fetchPrice } from "../blockchain/client";
 
 let amms: Amm[] = [];
 
@@ -50,7 +52,19 @@ export const getAmm = (address: string): Amm | undefined => {
 
 export const run = async () => {
   while (true) {
+    const priceCalls = [];
     amms = await getAmmsFromSubgraph();
+
+    for (const amm of amms) {
+      priceCalls.push(fetchPrice(amm.priceFeedKey));
+    }
+    const res = await Promise.all(priceCalls).catch((e) => {
+      logger.error(e);
+    });
+    for (let i = 0; i < amms.length; i++) {
+      amms[i].price = res && res[i] ? +res[i] : 0;
+    }
+
     await sleep(SUBGRAPH_FREQUENCY);
   }
 };

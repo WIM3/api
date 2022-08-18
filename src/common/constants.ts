@@ -29,4 +29,4 @@ export const SUBGRAPH_URL =
     ? "TODO"
     : "https://api.thegraph.com/subgraphs/name/infinix-finance/dev-fuji-positions";
 export const API3_PRICE_FEED =
-  EVM === "prod" ? "TODO" : "0x795036637AeB61359F1435C66117A371A433C174";
+  EVM === "prod" ? "TODO" : "0xdC91ea613247C0C9438A6F64Cc0E08291198981a";
