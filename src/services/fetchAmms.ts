@@ -53,7 +53,10 @@ export const getAmm = (address: string): Amm | undefined => {
 export const run = async () => {
   while (true) {
     const priceCalls = [];
-    amms = await getAmmsFromSubgraph();
+    const newAmms = await getAmmsFromSubgraph().catch((e) => {
+      logger.error(e);
+    });
+    if (newAmms) amms = newAmms;
 
     for (const amm of amms) {
       priceCalls.push(fetchPrice(amm.priceFeedKey));
