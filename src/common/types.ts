@@ -12,7 +12,6 @@ export interface Amm {
 }
 
 export interface Position {
-  id: string;
   timestamp: number;
   trader: string;
   amm: string;
@@ -29,16 +28,22 @@ export interface Position {
   liquidationPenalty: string;
   fundingPayment: string;
   totalPnlAmount: string;
+}
+
+export interface SubPosition extends Position {
+  id: string;
   positionChanges: PositionChange[];
   positionLiquidations: PositionLiquidation[];
   marginChanges: MarginChange[];
 }
 
+export interface DbPosition {
+  key: string;
+  position: Position;
+}
+
 export interface PositionChange {
-  id: string;
   timestamp: number;
-  trader: string;
-  amm: string;
   margin: string;
   notional: string;
   exchangedSize: string;
@@ -53,10 +58,7 @@ export interface PositionChange {
 }
 
 export interface PositionLiquidation {
-  id: string;
   timestamp: number;
-  trader: string;
-  amm: string;
   notional: string;
   size: string;
   liquidationFee: string;
@@ -65,15 +67,7 @@ export interface PositionLiquidation {
 }
 
 export interface MarginChange {
-  id: string;
   timestamp: number;
-  sender: string;
-  amm: string;
   amount: string;
   fundingPayment: string;
-}
-
-export interface DefaultModelResponse {
-  id: string;
-  value: string;
 }

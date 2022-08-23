@@ -1,14 +1,15 @@
 import axios from "axios";
 
 import { SUBGRAPH_LIMIT, SUBGRAPH_FREQUENCY, SUBGRAPH_URL } from "../common/constants";
-import { Position } from "../common/types";
+import { Position, SubPosition } from "../common/types";
 import { sleep } from "../common/utils";
 import { logger } from "../common/logger";
+import { savePosition } from "../model/positions";
 
-let positions: Position[] = [];
+let positions = new Map<string, Position>();
 
-const getPositionsFromSubgraph = async (): Promise<Position[]> => {
-  let positions: Position[] = [];
+const getPositionsFromSubgraph = async (): Promise<SubPosition[]> => {
+  let positions: SubPosition[] = [];
   let last = "";
 
   while (true) {
@@ -35,11 +36,8 @@ const getPositionsFromSubgraph = async (): Promise<Position[]> => {
                 liquidationPenalty
                 fundingPayment
                 totalPnlAmount
-                positionChanges (first: ${SUBGRAPH_LIMIT}) {
-                  id
+                positionChanges (first: ${SUBGRAPH_LIMIT}, orderBy: timestamp) {
                   timestamp
-                  trader
-                  amm
                   margin
                   notional
                   exchangedSize
@@ -52,22 +50,16 @@ const getPositionsFromSubgraph = async (): Promise<Position[]> => {
                   spotPrice
                   fundingPayment
                 }
-                positionLiquidations (first: ${SUBGRAPH_LIMIT}) {
-                  id
+                positionLiquidations (first: ${SUBGRAPH_LIMIT}, orderBy: timestamp) {
                   timestamp
-                  trader
-                  amm
                   notional
                   size
                   liquidationFee
                   liquidator
                   badDebt
                 }
-                marginChanges (first: ${SUBGRAPH_LIMIT}) {
-                  id
+                marginChanges (first: ${SUBGRAPH_LIMIT}, orderBy: timestamp) {
                   timestamp
-                  sender
-                  amm
                   amount
                   fundingPayment
                 }
@@ -84,7 +76,7 @@ const getPositionsFromSubgraph = async (): Promise<Position[]> => {
     ).data;
     if (res.errors) throw res.errors[0].message;
 
-    const tmp: Position[] = res.data.positions;
+    const tmp: SubPosition[] = res.data.positions;
     positions = positions.concat(tmp);
 
     if (tmp.length < SUBGRAPH_LIMIT) break;
@@ -93,17 +85,37 @@ const getPositionsFromSubgraph = async (): Promise<Position[]> => {
   return positions;
 };
 
-export const getPositions = (): Position[] => {
+export const getPositions = (): Map<string, Position> => {
   return positions;
 };
 
-// TODO: needs to be properly adjusted
-export const run = async () => {
+export const run = async (positionsFromDb: Map<string, Position>) => {
+  // initializing positions from DB so that it does not need to start over
+  positions = positionsFromDb;
+
   while (true) {
-    const newPositions = await getPositionsFromSubgraph().catch((e) => {
+    const subPositions = await getPositionsFromSubgraph().catch((e) => {
       logger.error(e);
     });
-    if (newPositions) positions = newPositions;
+
+    if (subPositions) {
+      for (const subPosition of subPositions) {
+        // checking if it already exists in memory
+        const oldPosition = positions.get(subPosition.id);
+        const { id, positionChanges, positionLiquidations, marginChanges, ...newPosition } =
+          subPosition;
+
+        // if they are exactly the same based on their timestamp, we can skip
+        if (oldPosition && newPosition.timestamp === oldPosition.timestamp) continue;
+
+        positions.set(subPosition.id, newPosition);
+        savePosition({ key: subPosition.id, position: newPosition }).catch((e) => {
+          logger.error(e);
+        });
+
+        // TODO: add processing of events
+      }
+    }
 
     await sleep(SUBGRAPH_FREQUENCY);
   }

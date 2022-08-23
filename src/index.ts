@@ -3,11 +3,13 @@ import * as dynamoose from "dynamoose";
 
 import { logger } from "./common/logger";
 import { EVM, PORT, AWS_CONFIG, RELOAD_RATE, STOP } from "./common/constants";
-import { Amm } from "./common/types";
+import { Amm, Position } from "./common/types";
 import { sleep } from "./common/utils";
 
+import { getPositions } from "./model/positions";
 import { getMarketsFromJson as fetchMarkets, getMarkets } from "./services/fetchMarkets";
 import { run as runAmms, getAmm } from "./services/fetchAmms";
+import { run as runPositions } from "./services/fetchPositions";
 
 /* Initial setup */
 
@@ -21,6 +23,26 @@ dynamoose.aws.ddb.set(ddb);
 const io = new Server({ cors: { origin: "*" } });
 
 /* Helper functions */
+
+const run = async () => {
+  fetchMarkets();
+  runAmms();
+  runPositions(await getPositionsFromDb());
+};
+
+const getPositionsFromDb = async (): Promise<Map<string, Position>> => {
+  const positionsFromDb = await getPositions().catch((e) => {
+    logger.error(e);
+  });
+
+  if (positionsFromDb) {
+    return new Map(
+      positionsFromDb.map((object) => {
+        return [object.key, object.position];
+      })
+    );
+  } else return new Map<string, Position>();
+};
 
 const getAmmInfo = async (amm: string): Promise<Amm> => {
   const ammInfo = getAmm(amm);
@@ -68,7 +90,6 @@ io.on("connection", (socket) => {
   addListener(socket, "amm_info", getAmmInfo);
 });
 
-fetchMarkets();
-runAmms();
+run();
 io.listen(PORT);
 logger.info(`Listening on port ${PORT}`);
