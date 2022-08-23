@@ -3,7 +3,7 @@ import * as dynamoose from "dynamoose";
 
 import { logger } from "./common/logger";
 import { EVM, PORT, AWS_CONFIG, RELOAD_RATE, STOP } from "./common/constants";
-import { Amm, Position } from "./common/types";
+import { Amm, DbPosition } from "./common/types";
 import { sleep } from "./common/utils";
 
 import { getPositions } from "./model/positions";
@@ -30,7 +30,7 @@ const run = async () => {
   runPositions(await getPositionsFromDb());
 };
 
-const getPositionsFromDb = async (): Promise<Map<string, Position>> => {
+const getPositionsFromDb = async (): Promise<Map<string, Omit<DbPosition, "key">>> => {
   const positionsFromDb = await getPositions().catch((e) => {
     logger.error(e);
   });
@@ -38,10 +38,10 @@ const getPositionsFromDb = async (): Promise<Map<string, Position>> => {
   if (positionsFromDb) {
     return new Map(
       positionsFromDb.map((object) => {
-        return [object.key, object.position];
+        return [object.key, { position: object.position, history: object.history }];
       })
     );
-  } else return new Map<string, Position>();
+  } else return new Map<string, Omit<DbPosition, "key">>();
 };
 
 const getAmmInfo = async (amm: string): Promise<Amm> => {

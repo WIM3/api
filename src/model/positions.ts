@@ -26,6 +26,28 @@ const PositionSchema = new Schema({
       totalPnlAmount: String,
     },
   },
+  history: {
+    type: Array,
+    schema: [
+      {
+        type: Object,
+        schema: {
+          timestamp: Number,
+          type: String,
+          trader: String,
+          amm: String,
+          margin: String,
+          size: String,
+          fee: String,
+          realizedPnl: String,
+          unrealizedPnlAfter: String,
+          amount: String,
+          fundingPayment: String,
+          notification: Boolean,
+        },
+      },
+    ],
+  },
 });
 
 const record = model(`infinix-${EVM}-positions`, PositionSchema, {

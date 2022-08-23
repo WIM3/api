@@ -15,6 +15,7 @@ export interface Position {
   timestamp: number;
   trader: string;
   amm: string;
+  status: string;
   margin: string;
   openNotional: string;
   size: string;
@@ -30,20 +31,35 @@ export interface Position {
   totalPnlAmount: string;
 }
 
-export interface SubPosition extends Position {
+export interface SubPosition extends Omit<Position, "status"> {
   id: string;
   positionChanges: PositionChange[];
-  positionLiquidations: PositionLiquidation[];
   marginChanges: MarginChange[];
 }
 
 export interface DbPosition {
   key: string;
   position: Position;
+  history: HistoryEvent[];
 }
 
-export interface PositionChange {
+export interface PositionEvent {
   timestamp: number;
+  type: string;
+}
+
+export interface HistoryEvent extends PositionEvent {
+  margin?: string;
+  size?: string;
+  fee?: string;
+  realizedPnl?: string;
+  unrealizedPnlAfter?: string;
+  amount?: string;
+  fundingPayment: string;
+  notification: boolean;
+}
+
+export interface PositionChange extends PositionEvent {
   margin: string;
   notional: string;
   exchangedSize: string;
@@ -57,17 +73,7 @@ export interface PositionChange {
   fundingPayment: string;
 }
 
-export interface PositionLiquidation {
-  timestamp: number;
-  notional: string;
-  size: string;
-  liquidationFee: string;
-  liquidator: string;
-  badDebt: string;
-}
-
-export interface MarginChange {
-  timestamp: number;
+export interface MarginChange extends PositionEvent {
   amount: string;
   fundingPayment: string;
 }

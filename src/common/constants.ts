@@ -12,6 +12,14 @@ export const AWS_CONFIG = {
 };
 export const RELOAD_RATE = process.env.RELOAD_RATE ? +process.env.RELOAD_RATE : 36000;
 
+export const enum STATUS {
+  Open = "Open",
+  Close = "Closed",
+  Chng = "Changed",
+  Mgn = "Margin Changed",
+  Liq = "Liquidated",
+  None = "Invalid",
+}
 export const STOP = "STOP";
 export const SUBGRAPH_LIMIT = 1000;
 export const SUBGRAPH_FREQUENCY = 36000;
