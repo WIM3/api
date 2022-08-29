@@ -13,11 +13,11 @@ export const AWS_CONFIG = {
 export const RELOAD_RATE = process.env.RELOAD_RATE ? +process.env.RELOAD_RATE : 36000;
 
 export const enum STATUS {
-  Open = "Open",
-  Close = "Closed",
-  Chng = "Changed",
-  Mgn = "Margin Changed",
-  Liq = "Liquidated",
+  Open = "Opening",
+  Close = "Closing",
+  Chng = "Changing",
+  Mgn = "Margin Changing",
+  Liq = "Liquidating",
   None = "Invalid",
 }
 export const STOP = "STOP";

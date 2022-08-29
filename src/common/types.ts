@@ -15,7 +15,7 @@ export interface Position {
   timestamp: number;
   trader: string;
   amm: string;
-  status: string;
+  active: boolean;
   margin: string;
   openNotional: string;
   size: string;
@@ -31,7 +31,7 @@ export interface Position {
   totalPnlAmount: string;
 }
 
-export interface SubPosition extends Omit<Position, "status"> {
+export interface SubPosition extends Omit<Position, "active"> {
   id: string;
   positionChanges: PositionChange[];
   marginChanges: MarginChange[];

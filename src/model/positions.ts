@@ -11,6 +11,7 @@ const PositionSchema = new Schema({
       timestamp: Number,
       trader: String,
       amm: String,
+      active: Boolean,
       margin: String,
       openNotional: String,
       size: String,

@@ -1,7 +1,8 @@
 import axios from "axios";
+import { BigNumber as BN } from "bignumber.js";
 
 import { SUBGRAPH_LIMIT, SUBGRAPH_FREQUENCY, SUBGRAPH_URL, STATUS } from "../common/constants";
-import { DbPosition, SubPosition, PositionChange, MarginChange } from "../common/types";
+import { DbPosition, SubPosition, Position, PositionChange, MarginChange } from "../common/types";
 import { sleep } from "../common/utils";
 import { logger } from "../common/logger";
 import { savePosition } from "../model/positions";
@@ -87,7 +88,6 @@ const getNewOrderedEvents = (
   // filtering out only those that are new
   for (const posChange of posChanges) {
     if (posChange.timestamp > timestamp) {
-      // TODO: replace with proper status definition
       posChange.type = STATUS.Chng;
       events.push(posChange);
     }
@@ -101,6 +101,21 @@ const getNewOrderedEvents = (
 
   // sorting aggregated events based on timestamp
   return events.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
+};
+
+const processPositionChange = (change: PositionChange, oldPosition?: Position): PositionChange => {
+  // TODO: confirm if this is correct
+  // exchangedSize lower than 0 should mean the position is closing
+  // old position not existing or having size lower than 0 should mean new one is opening
+  // liquidationPenalty greater than 0 should mean the position is being liquidated
+  if (new BN(change.exchangedSize).lt(0)) {
+    change.type = STATUS.Close;
+  } else if (!oldPosition || new BN(oldPosition.size).lt(0)) {
+    change.type = STATUS.Open;
+  } else if (new BN(change.liquidationPenalty).gt(0)) {
+    change.type = STATUS.Liq;
+  }
+  return change;
 };
 
 export const getPositions = (): Map<string, Omit<DbPosition, "key">> => {
@@ -143,7 +158,7 @@ export const run = async (positionsFromDb: Map<string, Omit<DbPosition, "key">>)
               notification: true,
             });
           } else {
-            const newEvent = <PositionChange>event;
+            const newEvent = processPositionChange(<PositionChange>event, old?.position);
             history.push({
               timestamp: newEvent.timestamp,
               type: newEvent.type,
@@ -157,10 +172,15 @@ export const run = async (positionsFromDb: Map<string, Omit<DbPosition, "key">>)
             });
           }
         }
-        const status = history[0] ? history[history.length - 1].type : STATUS.None;
+        // TODO: confirm if this is correct
+        // position should be considered active if it has not been liquidated or closed as the last event
+        const active =
+          history[0] &&
+          history[history.length - 1].type !== STATUS.Liq &&
+          history[history.length - 1].type !== STATUS.Close;
 
-        positions.set(subPosition.id, { position: { ...newPosition, status }, history });
-        savePosition({ key: subPosition.id, position: { ...newPosition, status }, history }).catch(
+        positions.set(subPosition.id, { position: { ...newPosition, active }, history });
+        savePosition({ key: subPosition.id, position: { ...newPosition, active }, history }).catch(
           (e) => {
             logger.error(e);
           }
