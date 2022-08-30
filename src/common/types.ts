@@ -12,6 +12,21 @@ export interface Amm {
   price?: number;
 }
 
+export interface PriceUpdate {
+  timestamp: number;
+  price: string;
+}
+
+export interface SubPriceFeed extends PriceUpdate {
+  id: string;
+  updates: PriceUpdate[];
+}
+
+export interface DbPriceFeed {
+  key: string;
+  history: PriceUpdate[];
+}
+
 export interface Position {
   timestamp: number;
   trader: string;

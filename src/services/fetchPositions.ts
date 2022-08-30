@@ -1,7 +1,7 @@
 import axios from "axios";
 import { BigNumber as BN } from "bignumber.js";
 
-import { SUBGRAPH_LIMIT, SUBGRAPH_FREQUENCY, SUBGRAPH_URL, STATUS } from "../common/constants";
+import { SUBGRAPH_LIMIT, SUBGRAPH_FREQUENCY, POSITION_SUBGRAPH, STATUS } from "../common/constants";
 import { DbPosition, SubPosition, Position, PositionChange, MarginChange } from "../common/types";
 import { sleep } from "../common/utils";
 import { logger } from "../common/logger";
@@ -16,7 +16,7 @@ const getPositionsFromSubgraph = async (): Promise<SubPosition[]> => {
   while (true) {
     const res = (
       await axios.post(
-        SUBGRAPH_URL,
+        POSITION_SUBGRAPH,
         {
           query: `query GetPositions {
               positions (first: ${SUBGRAPH_LIMIT}, where: { id_gt: "${last}" }) {
@@ -172,6 +172,7 @@ export const run = async (positionsFromDb: Map<string, Omit<DbPosition, "key">>)
             });
           }
         }
+
         // TODO: confirm if this is correct
         // position should be considered active if it has not been liquidated or closed as the last event
         const active =

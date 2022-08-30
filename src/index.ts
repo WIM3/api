@@ -3,12 +3,14 @@ import * as dynamoose from "dynamoose";
 
 import { logger } from "./common/logger";
 import { EVM, PORT, AWS_CONFIG, RELOAD_RATE, STOP } from "./common/constants";
-import { Amm, DbPosition } from "./common/types";
+import { Amm, DbPriceFeed, DbPosition } from "./common/types";
 import { sleep } from "./common/utils";
 
+import { getPriceFeeds } from "./model/prices";
 import { getPositions } from "./model/positions";
 import { getMarketsFromJson as fetchMarkets, getMarkets } from "./services/fetchMarkets";
 import { run as runAmms, getAmm } from "./services/fetchAmms";
+import { run as runPrices } from "./services/fetchPrices";
 import { run as runPositions } from "./services/fetchPositions";
 
 /* Initial setup */
@@ -27,7 +29,22 @@ const io = new Server({ cors: { origin: "*" } });
 const run = async () => {
   fetchMarkets();
   runAmms();
+  runPrices(await getPriceFeedsFromDb());
   runPositions(await getPositionsFromDb());
+};
+
+const getPriceFeedsFromDb = async (): Promise<Map<string, Omit<DbPriceFeed, "key">>> => {
+  const priceFeedsFromDb = await getPriceFeeds().catch((e) => {
+    logger.error(e);
+  });
+
+  if (priceFeedsFromDb) {
+    return new Map(
+      priceFeedsFromDb.map((object) => {
+        return [object.key, { history: object.history }];
+      })
+    );
+  } else return new Map<string, Omit<DbPriceFeed, "key">>();
 };
 
 const getPositionsFromDb = async (): Promise<Map<string, Omit<DbPosition, "key">>> => {

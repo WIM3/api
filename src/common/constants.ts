@@ -32,7 +32,11 @@ export const PROVIDER =
     : new ethers.providers.StaticJsonRpcProvider(
         `https://avalanche-fuji.infura.io/v3/${process.env.PROVIDER_KEY}`
       );
-export const SUBGRAPH_URL =
+export const PRICE_SUBGRAPH =
+  EVM === "prod"
+    ? "TODO"
+    : "https://api.thegraph.com/subgraphs/name/infinix-finance/dev-fuji-prices";
+export const POSITION_SUBGRAPH =
   EVM === "prod"
     ? "TODO"
     : "https://api.thegraph.com/subgraphs/name/infinix-finance/dev-fuji-positions";

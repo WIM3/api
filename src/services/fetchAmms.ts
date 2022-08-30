@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { SUBGRAPH_LIMIT, SUBGRAPH_FREQUENCY, SUBGRAPH_URL } from "../common/constants";
+import { SUBGRAPH_LIMIT, SUBGRAPH_FREQUENCY, POSITION_SUBGRAPH } from "../common/constants";
 import { Amm } from "../common/types";
 import { sleep } from "../common/utils";
 import { logger } from "../common/logger";
@@ -15,7 +15,7 @@ const getAmmsFromSubgraph = async (): Promise<Amm[]> => {
   while (true) {
     const res = (
       await axios.post(
-        SUBGRAPH_URL,
+        POSITION_SUBGRAPH,
         {
           query: `query GetAmms {
               amms (first: ${SUBGRAPH_LIMIT}, where: { id_gt: "${last}" }) {
