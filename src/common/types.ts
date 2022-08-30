@@ -8,7 +8,8 @@ export interface Amm {
   id: string;
   priceFeedKey: string;
   fundingPeriod: number;
-  price: number;
+  dataFeedId?: string;
+  price?: number;
 }
 
 export interface Position {

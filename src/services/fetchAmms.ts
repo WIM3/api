@@ -4,7 +4,7 @@ import { SUBGRAPH_LIMIT, SUBGRAPH_FREQUENCY, SUBGRAPH_URL } from "../common/cons
 import { Amm } from "../common/types";
 import { sleep } from "../common/utils";
 import { logger } from "../common/logger";
-import { fetchPrice } from "../blockchain/client";
+import { getDataFeedId, fetchPrice } from "../blockchain/client";
 
 let amms: Amm[] = [];
 
@@ -51,21 +51,39 @@ export const getAmm = (address: string): Amm | undefined => {
 };
 
 export const run = async () => {
+  // TODO: we need to double-check if it is enough to query it once
+  const dataFeeds: { [id: string]: string } = {};
+
   while (true) {
+    const feedKeys = [];
+    const feedCalls = [];
     const priceCalls = [];
     const newAmms = await getAmmsFromSubgraph().catch((e) => {
       logger.error(e);
     });
     if (newAmms) amms = newAmms;
 
+    // fetching all the necessary data from api3 feed
     for (const amm of amms) {
+      if (!dataFeeds[amm.priceFeedKey]) {
+        feedKeys.push(amm.priceFeedKey);
+        feedCalls.push(getDataFeedId(amm.priceFeedKey));
+      }
       priceCalls.push(fetchPrice(amm.priceFeedKey));
     }
-    const res = await Promise.all(priceCalls).catch((e) => {
+    const res = await Promise.all(priceCalls.concat(feedCalls)).catch((e) => {
       logger.error(e);
     });
-    for (let i = 0; i < amms.length; i++) {
-      amms[i].price = res && res[i] ? +res[i] : 0;
+
+    // storing fetched api3 data in amms
+    if (res) {
+      for (let i = amms.length; i < res.length; i++) {
+        dataFeeds[feedKeys[i - amms.length]] = res[i];
+      }
+      for (let i = 0; i < amms.length; i++) {
+        amms[i].price = res[i] ? +res[i] : undefined;
+        amms[i].dataFeedId = dataFeeds[amms[i].priceFeedKey];
+      }
     }
 
     await sleep(SUBGRAPH_FREQUENCY);
