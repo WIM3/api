@@ -18,3 +18,5 @@
 
 - `markets` - sends all market and pair information
 - `amm_info` - ... (in progress)
+- `pair_prices` - ... (in progress)
+- `user_positions` - ... (in progress)

@@ -66,6 +66,10 @@ export const getPrices = (): Map<string, Omit<DbPriceFeed, "key">> => {
   return priceFeeds;
 };
 
+export const getSpecificPriceFeed = (feedKey: string): Omit<DbPriceFeed, "key"> | undefined => {
+  return priceFeeds.get(feedKey);
+};
+
 export const run = async (priceFeedsFromDb: Map<string, Omit<DbPriceFeed, "key">>) => {
   // initializing prices from DB so that it does not need to start over
   priceFeeds = priceFeedsFromDb;

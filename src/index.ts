@@ -10,8 +10,8 @@ import { getPriceFeeds } from "./model/prices";
 import { getPositions } from "./model/positions";
 import { getMarketsFromJson as fetchMarkets, getMarkets } from "./services/fetchMarkets";
 import { run as runAmms, getAmm } from "./services/fetchAmms";
-import { run as runPrices } from "./services/fetchPrices";
-import { run as runPositions } from "./services/fetchPositions";
+import { run as runPrices, getSpecificPriceFeed } from "./services/fetchPrices";
+import { run as runPositions, getPositionsByUser } from "./services/fetchPositions";
 
 /* Initial setup */
 
@@ -67,6 +67,16 @@ const getAmmInfo = async (amm: string): Promise<Amm> => {
   return ammInfo;
 };
 
+const getPairPriceHistory = async (feedKey: string): Promise<Omit<DbPriceFeed, "key">> => {
+  const priceFeed = getSpecificPriceFeed(feedKey.toLowerCase());
+  if (!priceFeed) throw `No price feed for ${feedKey} found`;
+  return priceFeed;
+};
+
+const getUserPositions = async (user: string): Promise<Omit<DbPosition, "key">[]> => {
+  return getPositionsByUser(user.toLowerCase());
+};
+
 // TODO: needs to be investigated if this is the best way to handle communication
 const addListener = (
   socket: Socket,
@@ -105,6 +115,8 @@ io.on("connection", (socket) => {
   socket.emit("markets", getMarkets());
 
   addListener(socket, "amm_info", getAmmInfo);
+  addListener(socket, "pair_prices", getPairPriceHistory);
+  addListener(socket, "user_positions", getUserPositions);
 });
 
 run();

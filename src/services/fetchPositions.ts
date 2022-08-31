@@ -122,6 +122,12 @@ export const getPositions = (): Map<string, Omit<DbPosition, "key">> => {
   return positions;
 };
 
+export const getPositionsByUser = (user: string): Omit<DbPosition, "key">[] => {
+  return [...positions.values()].filter(
+    (obj: Omit<DbPosition, "key">) => obj.position.trader === user
+  );
+};
+
 export const run = async (positionsFromDb: Map<string, Omit<DbPosition, "key">>) => {
   // initializing positions from DB so that it does not need to start over
   positions = positionsFromDb;
