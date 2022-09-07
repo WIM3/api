@@ -3,7 +3,7 @@ import * as dynamoose from "dynamoose";
 
 import { logger } from "./common/logger";
 import { EVM, PORT, AWS_CONFIG, RELOAD_RATE, STOP } from "./common/constants";
-import { Amm, DbPriceFeed, DbPosition } from "./common/types";
+import { Amm, DbPriceFeed, DbPosition, HistoryEvent } from "./common/types";
 import { sleep } from "./common/utils";
 
 import { getPriceFeeds } from "./model/prices";
@@ -11,7 +11,11 @@ import { getPositions } from "./model/positions";
 import { getMarketsFromJson as fetchMarkets, getMarkets } from "./services/fetchMarkets";
 import { run as runAmms, getAmm } from "./services/fetchAmms";
 import { run as runPrices, getSpecificPriceFeed } from "./services/fetchPrices";
-import { run as runPositions, getPositionsByUser } from "./services/fetchPositions";
+import {
+  run as runPositions,
+  getPositionsByUser,
+  getRecentlyOpenedPositionsByAmm,
+} from "./services/fetchPositions";
 
 /* Initial setup */
 
@@ -77,6 +81,10 @@ const getUserPositions = async (user: string): Promise<Omit<DbPosition, "key">[]
   return getPositionsByUser(user.toLowerCase());
 };
 
+const getAmmPositions = async (amm: string): Promise<HistoryEvent[]> => {
+  return getRecentlyOpenedPositionsByAmm(amm.toLowerCase());
+};
+
 // TODO: needs to be investigated if this is the best way to handle communication
 const addListener = (
   socket: Socket,
@@ -117,6 +125,7 @@ io.on("connection", (socket) => {
   addListener(socket, "amm_info", getAmmInfo);
   addListener(socket, "pair_prices", getPairPriceHistory);
   addListener(socket, "user_positions", getUserPositions);
+  addListener(socket, "amm_positions", getAmmPositions);
 });
 
 run();

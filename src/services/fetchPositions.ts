@@ -1,8 +1,21 @@
 import axios from "axios";
 import { BigNumber as BN } from "bignumber.js";
 
-import { SUBGRAPH_LIMIT, SUBGRAPH_FREQUENCY, POSITION_SUBGRAPH, STATUS } from "../common/constants";
-import { DbPosition, SubPosition, Position, PositionChange, MarginChange } from "../common/types";
+import {
+  SUBGRAPH_LIMIT,
+  SUBGRAPH_FREQUENCY,
+  MAX_POSITIONS,
+  POSITION_SUBGRAPH,
+  STATUS,
+} from "../common/constants";
+import {
+  DbPosition,
+  SubPosition,
+  Position,
+  PositionChange,
+  MarginChange,
+  HistoryEvent,
+} from "../common/types";
 import { sleep } from "../common/utils";
 import { logger } from "../common/logger";
 import { savePosition } from "../model/positions";
@@ -126,6 +139,25 @@ export const getPositionsByUser = (user: string): Omit<DbPosition, "key">[] => {
   return [...positions.values()].filter(
     (obj: Omit<DbPosition, "key">) => obj.position.trader === user
   );
+};
+
+export const getRecentlyOpenedPositionsByAmm = (amm: string): HistoryEvent[] => {
+  const recentlyOpened: HistoryEvent[] = [];
+  const filteredPositions = [...positions.values()].filter(
+    (obj: Omit<DbPosition, "key">) => obj.position.amm === amm
+  );
+
+  for (const position of filteredPositions) {
+    for (const event of position.history) {
+      if (event.type === STATUS.Open) recentlyOpened.push(event);
+    }
+  }
+
+  // sorting recently opened based on timestamp and returning only last few
+  const sortedPositions = recentlyOpened.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
+  return sortedPositions.length > MAX_POSITIONS
+    ? sortedPositions.slice(0 - MAX_POSITIONS)
+    : sortedPositions;
 };
 
 export const run = async (positionsFromDb: Map<string, Omit<DbPosition, "key">>) => {
