@@ -10,7 +10,7 @@ export const AWS_CONFIG = {
   accessKeyId: process.env.ACCESS_KEY_ID || "",
   secretAccessKey: process.env.SECRET_ACCESS_KEY || "",
 };
-export const RELOAD_RATE = process.env.RELOAD_RATE ? +process.env.RELOAD_RATE : 36000;
+export const RELOAD_RATE = process.env.RELOAD_RATE ? +process.env.RELOAD_RATE : 30000;
 
 export const enum STATUS {
   Open = "Opening",

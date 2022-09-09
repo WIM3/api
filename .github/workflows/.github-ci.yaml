@@ -69,6 +69,7 @@ jobs:
         env:
           IMAGE_TAG: dev-${{ github.run_number }}
           CHART_NAME: dev-chart
+          PROVIDER: ${{ secrets.DEV_PROVIDER }}
         run: |
           aws eks update-kubeconfig --name $STAGE_KUBE_CLUSTER_NAME
           helm subenv -f ./k8s/dev.yaml
@@ -82,6 +83,7 @@ jobs:
         env:
           IMAGE_TAG: production-${{ github.run_number }}
           CHART_NAME: production-chart
+          PROVIDER: ${{ secrets.DEV_PROVIDER }}
         run: |
           aws eks update-kubeconfig --name $PRODUCTION_KUBE_CLUSTER_NAME
           helm subenv -f ./k8s/production.yaml
