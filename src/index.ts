@@ -114,8 +114,7 @@ const addListener = (
       });
       if (!active) return;
 
-      // TODO: in most cases this will work, but sometimes it sends it anyway
-      if (current != prev) {
+      if (JSON.stringify(current) !== JSON.stringify(prev)) {
         socket.emit(channel, current);
         prev = current;
       } else if (current) {
