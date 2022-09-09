@@ -85,41 +85,53 @@ const getAmmPositions = async (amm: string): Promise<HistoryEvent[]> => {
   return getRecentlyOpenedPositionsByAmm(amm.toLowerCase());
 };
 
-// TODO: needs to be investigated if this is the best way to handle communication
 const addListener = (
   socket: Socket,
   channel: string,
   getResponse: (arg: string) => Promise<any>
 ) => {
-  socket.on(channel, async (arg) => {
-    let active = arg !== STOP;
+  const listener = async (arg: string) => {
+    if (arg === STOP) return;
+
+    let active = true;
     let prev;
 
-    // stopping live feed
-    socket.on("disconnect", () => {
+    // stopping live feed in case of new request or disconnect
+    const stop = () => {
+      logger.debug(`client stopped communication - ${channel}`);
       active = false;
-    });
-    socket.on(channel, () => {
-      active = false;
-    });
+      socket.off(channel, stop);
+      socket.off("disconnect", stop);
+    };
+    socket.on(channel, stop);
+    socket.on("disconnect", stop);
 
+    logger.debug(`client started communication - ${channel}`);
     while (active) {
       const current = await getResponse(arg).catch((e) => {
         logger.error(e);
         socket.emit(channel, e);
       });
-      if (current !== prev) {
+      if (!active) return;
+
+      // TODO: in most cases this will work, but sometimes it sends it anyway
+      if (current != prev) {
         socket.emit(channel, current);
         prev = current;
+      } else if (current) {
+        logger.debug("no change, no need to emit");
       }
       await sleep(RELOAD_RATE);
     }
-  });
+  };
+
+  socket.on(channel, listener);
 };
 
 /* Application core */
 
 io.on("connection", (socket) => {
+  logger.debug("client connected");
   socket.emit("markets", getMarkets());
 
   addListener(socket, "amm_info", getAmmInfo);
