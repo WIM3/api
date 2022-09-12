@@ -14,7 +14,7 @@ env:
   STAGE_CHART_REGISTRY: ${{ secrets.STAGE_CHART_REGISTRY }}
   PRODUCTION_CHART_REGISTRY: ${{ secrets.PRODUCTION_CHART_REGISTRY }}
   ECR_REPOSITORY: infinix/api
-  DEPLOYMENT_NAME: "infinix-api"
+  DEPLOYMENT_NAME: "api"
 
 jobs:
   build:
@@ -39,6 +39,7 @@ jobs:
         env:
           IMAGE_TAG: dev-${{ github.run_number }}
         run: |
+          aws --version
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
