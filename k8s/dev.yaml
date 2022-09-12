@@ -10,7 +10,7 @@ env:
   PORT: "8080"
   AWS_REGION: eu-central-1
   ENVIRONMENT: dev
-  PROVIDER: $PROVIDER
+  PROVIDER_KEY: $PROVIDER
 
 service:
   enabled: true
