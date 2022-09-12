@@ -116,16 +116,16 @@ const getNewOrderedEvents = (
   return events.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
 };
 
-const processPositionChange = (change: PositionChange, oldPosition?: Position): PositionChange => {
+const processPositionChange = (change: PositionChange, oldPositionSize: string): PositionChange => {
   // TODO: confirm if this is correct
   // liquidationPenalty greater than 0 should mean the position is being liquidated
   // sizeAfter equal to 0 should mean the position is closing
-  // old position not existing or having size equal to 0 should mean new one is opening
+  // old position size equal to 0 (or not existing) should mean new one is opening
   if (new BN(change.liquidationPenalty).gt(0)) {
     change.type = STATUS.Liq;
   } else if (new BN(change.sizeAfter).eq(0)) {
     change.type = STATUS.Close;
-  } else if (!oldPosition || new BN(oldPosition.size).eq(0)) {
+  } else if (new BN(oldPositionSize).eq(0)) {
     change.type = STATUS.Open;
   }
   return change;
@@ -180,6 +180,7 @@ export const run = async (positionsFromDb: Map<string, Omit<DbPosition, "key">>)
         if (old && newPosition.timestamp === old.position.timestamp) continue;
 
         // processing of position related events
+        let oldPositionSize = old ? old.position.size : "0";
         const events = getNewOrderedEvents(
           subPosition.positionChanges,
           subPosition.marginChanges,
@@ -196,7 +197,7 @@ export const run = async (positionsFromDb: Map<string, Omit<DbPosition, "key">>)
               notification: true,
             });
           } else {
-            const newEvent = processPositionChange(<PositionChange>event, old?.position);
+            const newEvent = processPositionChange(<PositionChange>event, oldPositionSize);
             history.push({
               timestamp: newEvent.timestamp,
               type: newEvent.type,
@@ -208,6 +209,7 @@ export const run = async (positionsFromDb: Map<string, Omit<DbPosition, "key">>)
               fundingPayment: newEvent.fundingPayment,
               notification: true,
             });
+            oldPositionSize = newEvent.sizeAfter;
           }
         }
 
