@@ -73,6 +73,7 @@ jobs:
           pip install awscli
           curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
           helm plugin install https://github.com/hydeenoble/helm-subenv.git
+          helm plugin install https://github.com/hypnoglow/helm-s3.git
 
       - name: Deploy - DEV
         if: ${{ github.ref == 'refs/heads/dev' }}
