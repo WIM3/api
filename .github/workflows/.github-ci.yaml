@@ -19,7 +19,7 @@ env:
 jobs:
   build:
     name: Build
-    runs-on: self-hosted
+    runs-on: infinix
 
     steps:
       - name: Checkout
@@ -53,7 +53,7 @@ jobs:
   deploy:
     name: Deploy
     needs: build
-    runs-on: self-hosted
+    runs-on: infinix
 
     steps:
       - name: Checkout
@@ -63,17 +63,6 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: eu-central-1
-      
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.7'
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install awscli
-          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-          helm plugin install https://github.com/hydeenoble/helm-subenv.git
-          helm plugin install https://github.com/hypnoglow/helm-s3.git
 
       - name: Deploy - DEV
         if: ${{ github.ref == 'refs/heads/dev' }}
