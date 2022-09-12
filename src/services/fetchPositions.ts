@@ -118,15 +118,15 @@ const getNewOrderedEvents = (
 
 const processPositionChange = (change: PositionChange, oldPosition?: Position): PositionChange => {
   // TODO: confirm if this is correct
-  // exchangedSize lower than 0 should mean the position is closing
-  // old position not existing or having size lower than 0 should mean new one is opening
   // liquidationPenalty greater than 0 should mean the position is being liquidated
-  if (new BN(change.exchangedSize).lt(0)) {
-    change.type = STATUS.Close;
-  } else if (!oldPosition || new BN(oldPosition.size).lt(0)) {
-    change.type = STATUS.Open;
-  } else if (new BN(change.liquidationPenalty).gt(0)) {
+  // sizeAfter equal to 0 should mean the position is closing
+  // old position not existing or having size equal to 0 should mean new one is opening
+  if (new BN(change.liquidationPenalty).gt(0)) {
     change.type = STATUS.Liq;
+  } else if (new BN(change.sizeAfter).eq(0)) {
+    change.type = STATUS.Close;
+  } else if (!oldPosition || new BN(oldPosition.size).eq(0)) {
+    change.type = STATUS.Open;
   }
   return change;
 };
@@ -149,7 +149,7 @@ export const getRecentlyOpenedPositionsByAmm = (amm: string): HistoryEvent[] => 
 
   for (const position of filteredPositions) {
     for (const event of position.history) {
-      if (event.type === STATUS.Open) recentlyOpened.push(event);
+      if (event.type === STATUS.Open || event.type === STATUS.Chng) recentlyOpened.push(event);
     }
   }
 
