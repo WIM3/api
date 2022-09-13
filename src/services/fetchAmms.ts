@@ -20,6 +20,7 @@ const getAmmsFromSubgraph = async (): Promise<Amm[]> => {
           query: `query GetAmms {
               amms (first: ${SUBGRAPH_LIMIT}, where: { id_gt: "${last}" }) {
                 id
+                quoteAsset
                 priceFeedKey
                 fundingPeriod
               }
