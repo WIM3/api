@@ -23,6 +23,12 @@ const getAmmsFromSubgraph = async (): Promise<Amm[]> => {
                 quoteAsset
                 priceFeedKey
                 fundingPeriod
+                fundingBufferPeriod
+                lastFunding
+                fundingRate
+                tradeLimitRatio
+                tradingVolume
+                underlyingPrice
               }
             }`,
         },
@@ -76,14 +82,18 @@ export const run = async () => {
       logger.error(e);
     });
 
-    // storing fetched api3 data in amms
+    // storing fetched api3 data in amms and calculating next funding
     if (res) {
       for (let i = amms.length; i < res.length; i++) {
         dataFeeds[feedKeys[i - amms.length]] = res[i];
       }
       for (let i = 0; i < amms.length; i++) {
+        const nextFunding = Math.floor((amms[i].lastFunding + amms[i].fundingPeriod) / 3600) * 3600;
+
         amms[i].price = res[i] ? +res[i] : undefined;
         amms[i].dataFeedId = dataFeeds[amms[i].priceFeedKey];
+        amms[i].nextFunding =
+          nextFunding > amms[i].fundingBufferPeriod ? nextFunding : amms[i].fundingBufferPeriod;
       }
     }
 

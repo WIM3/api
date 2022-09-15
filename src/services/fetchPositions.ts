@@ -11,7 +11,6 @@ import {
 import {
   DbPosition,
   SubPosition,
-  Position,
   PositionChange,
   MarginChange,
   HistoryEvent,
