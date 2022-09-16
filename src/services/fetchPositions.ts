@@ -140,20 +140,25 @@ export const getPositionsByUser = (user: string): Omit<DbPosition, "key">[] => {
   );
 };
 
-export const getRecentlyOpenedPositionsByAmm = (amm: string): HistoryEvent[] => {
-  const recentlyOpened: HistoryEvent[] = [];
-  const filteredPositions = [...positions.values()].filter(
-    (obj: Omit<DbPosition, "key">) => obj.position.amm === amm
-  );
+export const getRecentPositionsByAmm = (amm: string): HistoryEvent[] => {
+  const recent: HistoryEvent[] = [];
 
-  for (const position of filteredPositions) {
-    for (const event of position.history) {
-      if (event.type === STATUS.Open || event.type === STATUS.Chng) recentlyOpened.push(event);
+  // filtering all the events based on amm and adding entry price
+  for (const obj of [...positions.values()]) {
+    if (obj.position.amm === amm) {
+      for (const event of obj.history) {
+        recent.push({
+          type: event.type,
+          timestamp: event.timestamp,
+          size: event.size,
+          price: obj.position.entryPrice,
+        });
+      }
     }
   }
 
-  // sorting recently opened based on timestamp and returning only last few
-  const sortedPositions = recentlyOpened.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
+  // sorting positions based on timestamp and returning only last few
+  const sortedPositions = recent.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
   return sortedPositions.length > MAX_POSITIONS
     ? sortedPositions.slice(0 - MAX_POSITIONS)
     : sortedPositions;

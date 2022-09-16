@@ -14,7 +14,7 @@ import { run as runPrices, getSpecificPriceFeed } from "./services/fetchPrices";
 import {
   run as runPositions,
   getPositionsByUser,
-  getRecentlyOpenedPositionsByAmm,
+  getRecentPositionsByAmm,
 } from "./services/fetchPositions";
 
 /* Initial setup */
@@ -82,7 +82,7 @@ const getUserPositions = async (user: string): Promise<Omit<DbPosition, "key">[]
 };
 
 const getAmmPositions = async (amm: string): Promise<HistoryEvent[]> => {
-  return getRecentlyOpenedPositionsByAmm(amm.toLowerCase());
+  return getRecentPositionsByAmm(amm.toLowerCase());
 };
 
 const addListener = (

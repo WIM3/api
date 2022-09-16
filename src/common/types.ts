@@ -73,14 +73,15 @@ export interface PositionEvent {
 }
 
 export interface HistoryEvent extends PositionEvent {
+  price?: string;
   margin?: string;
   size?: string;
   fee?: string;
   realizedPnl?: string;
   unrealizedPnlAfter?: string;
   amount?: string;
-  fundingPayment: string;
-  notification: boolean;
+  fundingPayment?: string;
+  notification?: boolean;
 }
 
 export interface PositionChange extends PositionEvent {
