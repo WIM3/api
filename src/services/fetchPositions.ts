@@ -158,9 +158,9 @@ export const getRecentPositionsByAmm = (amm: string): HistoryEvent[] => {
   }
 
   // sorting positions based on timestamp and returning only last few
-  const sortedPositions = recent.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
+  const sortedPositions = recent.sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1));
   return sortedPositions.length > MAX_POSITIONS
-    ? sortedPositions.slice(0 - MAX_POSITIONS)
+    ? sortedPositions.slice(0, MAX_POSITIONS)
     : sortedPositions;
 };
 
