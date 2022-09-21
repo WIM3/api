@@ -45,6 +45,7 @@ const PositionSchema = new Schema({
           unrealizedPnlAfter: String,
           amount: String,
           fundingPayment: String,
+          leverage: String,
           entryPrice: String,
           underlyingPrice: String,
           notification: Boolean,

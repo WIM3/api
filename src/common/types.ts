@@ -71,6 +71,7 @@ export interface DbPosition {
 export interface PositionEvent {
   timestamp: number;
   type: string;
+  leverage: string;
   entryPrice: string;
   underlyingPrice: string;
 }

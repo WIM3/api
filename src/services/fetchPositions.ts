@@ -156,6 +156,7 @@ export const getRecentPositionsByAmm = (amm: string): HistoryEvent[] => {
           type: event.type,
           timestamp: event.timestamp,
           size: event.size,
+          leverage: event.leverage,
           entryPrice: event.entryPrice,
           underlyingPrice: event.underlyingPrice,
         });
@@ -204,6 +205,7 @@ export const run = async (positionsFromDb: Map<string, Omit<DbPosition, "key">>)
               type: newEvent.type,
               amount: newEvent.amount,
               fundingPayment: newEvent.fundingPayment,
+              leverage: newEvent.leverage,
               entryPrice: newEvent.entryPrice,
               underlyingPrice: newEvent.underlyingPrice,
               notification: true,
@@ -219,6 +221,7 @@ export const run = async (positionsFromDb: Map<string, Omit<DbPosition, "key">>)
               realizedPnl: newEvent.realizedPnl,
               unrealizedPnlAfter: newEvent.unrealizedPnlAfter,
               fundingPayment: newEvent.fundingPayment,
+              leverage: newEvent.leverage,
               entryPrice: newEvent.entryPrice,
               underlyingPrice: newEvent.underlyingPrice,
               notification: true,
