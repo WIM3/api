@@ -46,6 +46,7 @@ export interface Position {
   tradingVolume: string;
   leverage: string;
   entryPrice: string;
+  underlyingPrice: string;
   fee: string;
   realizedPnl: string;
   unrealizedPnl: string;
@@ -70,6 +71,8 @@ export interface DbPosition {
 export interface PositionEvent {
   timestamp: number;
   type: string;
+  entryPrice: string;
+  underlyingPrice: string;
 }
 
 export interface HistoryEvent extends PositionEvent {

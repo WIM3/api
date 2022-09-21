@@ -42,6 +42,7 @@ const getPositionsFromSubgraph = async (): Promise<SubPosition[]> => {
                 tradingVolume
                 leverage
                 entryPrice
+                underlyingPrice
                 fee
                 realizedPnl
                 unrealizedPnl
@@ -62,11 +63,15 @@ const getPositionsFromSubgraph = async (): Promise<SubPosition[]> => {
                   liquidationPenalty
                   spotPrice
                   fundingPayment
+                  entryPrice
+                  underlyingPrice
                 }
                 marginChanges (first: ${SUBGRAPH_LIMIT}, orderBy: timestamp) {
                   timestamp
                   amount
                   fundingPayment
+                  entryPrice
+                  underlyingPrice
                 }
               }
             }`,
@@ -143,7 +148,7 @@ export const getPositionsByUser = (user: string): Omit<DbPosition, "key">[] => {
 export const getRecentPositionsByAmm = (amm: string): HistoryEvent[] => {
   const recent: HistoryEvent[] = [];
 
-  // filtering all the events based on amm and adding entry price
+  // filtering all the events based on amm
   for (const obj of [...positions.values()]) {
     if (obj.position.amm === amm) {
       for (const event of obj.history) {
@@ -151,7 +156,8 @@ export const getRecentPositionsByAmm = (amm: string): HistoryEvent[] => {
           type: event.type,
           timestamp: event.timestamp,
           size: event.size,
-          price: obj.position.entryPrice,
+          entryPrice: event.entryPrice,
+          underlyingPrice: event.underlyingPrice,
         });
       }
     }
@@ -198,6 +204,8 @@ export const run = async (positionsFromDb: Map<string, Omit<DbPosition, "key">>)
               type: newEvent.type,
               amount: newEvent.amount,
               fundingPayment: newEvent.fundingPayment,
+              entryPrice: newEvent.entryPrice,
+              underlyingPrice: newEvent.underlyingPrice,
               notification: true,
             });
           } else {
@@ -211,6 +219,8 @@ export const run = async (positionsFromDb: Map<string, Omit<DbPosition, "key">>)
               realizedPnl: newEvent.realizedPnl,
               unrealizedPnlAfter: newEvent.unrealizedPnlAfter,
               fundingPayment: newEvent.fundingPayment,
+              entryPrice: newEvent.entryPrice,
+              underlyingPrice: newEvent.underlyingPrice,
               notification: true,
             });
             oldPositionSize = newEvent.sizeAfter;
