@@ -63,6 +63,7 @@ const getPositionsFromSubgraph = async (): Promise<SubPosition[]> => {
                   liquidationPenalty
                   spotPrice
                   fundingPayment
+                  leverage
                   entryPrice
                   underlyingPrice
                 }
@@ -70,6 +71,7 @@ const getPositionsFromSubgraph = async (): Promise<SubPosition[]> => {
                   timestamp
                   amount
                   fundingPayment
+                  leverage
                   entryPrice
                   underlyingPrice
                 }
