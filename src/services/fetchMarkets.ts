@@ -12,20 +12,20 @@ const mockData = {
     L2PriceFeed: "0xb0C0387bC0eBe8C8A6Cc7f089B12aB1a063AAfFb",
     ClearingHouse: "0x5d9593586b4B5edBd23E7Eba8d88FD8F09D83EBd",
     Markets: {
-      Amberdata: {
+      Crypto: {
         BTCUSDC: "0x0",
         SOLUSDC: "0x0",
         AVAXUSDC: "0x0",
       },
-      "S&P Platts": {
+      SPPlatts: {
         BATCH04: "0x0",
         BATCP04: "0x0",
         CNCAD00: "0x0",
         ACRCA00: "0x0",
       },
-      "S&P Indices": {
-        "Bitcoin Index": "0x0",
-        "Ethereum Index": "0x0",
+      SPIndices: {
+        SPBTC: "0x0",
+        SPETH: "0x0",
       },
     },
   },
