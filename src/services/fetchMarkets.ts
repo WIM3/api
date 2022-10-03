@@ -8,38 +8,23 @@ import { logger } from "../common/logger";
 // based on this - https://github.com/bbenligiray/data-feed-reader-example/tree/avalanche-testnet#dapi-names
 const mockData = {
   contracts: {
-    InsuranceFund: "0x8C29F6F7fc1999aB84b476952E986F974Acb3824",
-    L2PriceFeed: "0xb0C0387bC0eBe8C8A6Cc7f089B12aB1a063AAfFb",
-    ClearingHouse: "0x5d9593586b4B5edBd23E7Eba8d88FD8F09D83EBd",
     Markets: {
       Crypto: {
-        BTCUSDC: "0x0",
-        SOLUSDC: "0x0",
-        AVAXUSDC: "0x0",
+        BTCUSDC: "0x6b91c20cb2F01843E07F337085e7f6cB71DD103f",
+        SOLUSDC: "0x883bB1ABF2B9011456e797CE1aa9384B4177F4A6",
+        AVAXUSDC: "0x2e49aCCF96Fa08090aE1eEa3DA246803bd95aEC9",
       },
       SPPlatts: {
-        BATCH04: "0x0",
-        BATCP04: "0x0",
-        CNCAD00: "0x0",
-        ACRCA00: "0x0",
+        BATCH04: "0x1a35B421551ec1437FC72ba69281376f95B5a3C4",
+        BATCP04: "0x100AFFBc0E5A71a9b0F9A093442C369eB5525913",
+        CNCAD00: "0x56c5fcCF5e6389965892F6d76D9445aF130b4ce0",
+        ACRCA00: "0x3AbCE047D741cBbB5a0A6933449A0966d5888986",
       },
       SPIndices: {
-        SPBTC: "0x0",
-        SPETH: "0x0",
+        SPBTC: "0x9a5186e2797f59F7144Cd288789CacC5903217c4",
+        SPETH: "0x3EDa393D828278A34c8f5Bf9da5d712dFb275DA5",
       },
     },
-  },
-  accounts: [],
-  network: "fuji",
-  externalContracts: {
-    foundationGovernance: "0x371D128A0a286800d3A5E830F1D26dFf237A3279",
-    arbitrageur: "0x1A48776f436bcDAA16845A378666cf4BA131eb0F",
-    usdc: "0xDDAfbb505ad214D7b80b1f830fcCc89B60fb7A83",
-    tether: "0x4ECaBa5870353805a9F068101A40E0f32ed605C6",
-    ambBridgeOnXDai: "0x75Df5AF045d91108662D8080fD1FEFAd6aA0bb59",
-    multiTokenMediatorOnXDai: "0xf6A78083ca3e2a662D6dd1703c939c8aCE2e268d",
-    proxyAdmin: "0x29853EcF31eaedcD9074a11A85A8C8b689165F0b",
-    referral: "0xF1d5BA04a25A6D88c468af932BFe2B1e78db7B45",
   },
 };
 
