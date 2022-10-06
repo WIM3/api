@@ -106,7 +106,6 @@ export const run = async (priceFeedsFromDb: Map<string, Omit<DbPriceFeed, "key">
       }
     }
 
-    // TODO: should be fixed later, just a hotfix for now
-    await sleep(SUBGRAPH_FREQUENCY * 60);
+    await sleep(SUBGRAPH_FREQUENCY);
   }
 };
