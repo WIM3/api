@@ -22,7 +22,7 @@ export const enum STATUS {
 }
 export const STOP = "STOP";
 export const SUBGRAPH_LIMIT = 1000;
-export const SUBGRAPH_FREQUENCY = 36000;
+export const SUBGRAPH_FREQUENCY = 15000;
 export const MAX_POSITIONS = 15;
 
 export const PROVIDER =
