@@ -98,7 +98,7 @@ export const run = async (priceFeedsFromDb: Map<string, Omit<DbPriceFeed, "key">
         }
 
         priceFeeds.set(subPriceFeed.id, { history });
-        savePriceFeed({ key: subPriceFeed.id, history }).catch((e) => {
+        await savePriceFeed({ key: subPriceFeed.id, history }).catch((e) => {
           logger.error(e);
         });
 
@@ -106,6 +106,7 @@ export const run = async (priceFeedsFromDb: Map<string, Omit<DbPriceFeed, "key">
       }
     }
 
-    await sleep(SUBGRAPH_FREQUENCY);
+    // TODO: it is enough to only check this once in 10 minutes for now
+    await sleep(10 * 60 * 1000);
   }
 };

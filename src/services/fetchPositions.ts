@@ -248,11 +248,13 @@ export const run = async (positionsFromDb: Map<string, Omit<DbPosition, "key">>)
           history[history.length - 1].type !== STATUS.Close;
 
         positions.set(subPosition.id, { position: { ...newPosition, active }, history });
-        savePosition({ key: subPosition.id, position: { ...newPosition, active }, history }).catch(
-          (e) => {
-            logger.error(e);
-          }
-        );
+        await savePosition({
+          key: subPosition.id,
+          position: { ...newPosition, active },
+          history,
+        }).catch((e) => {
+          logger.error(e);
+        });
 
         if (lastUpdateTs < newPosition.timestamp) lastUpdateTs = newPosition.timestamp;
       }
