@@ -150,18 +150,25 @@ export const getPositionsByUser = (user: string): Omit<DbPosition, "key">[] => {
 export const getRecentPositionsByAmm = (amm: string): HistoryEvent[] => {
   const recent: HistoryEvent[] = [];
 
-  // filtering all the events based on amm
+  // TODO: we need to make sure if only those types should show up
+  // filtering all the events based on amm and type
   for (const obj of [...positions.values()]) {
     if (obj.position.amm === amm) {
       for (const event of obj.history) {
-        recent.push({
-          type: event.type,
-          timestamp: event.timestamp,
-          size: event.size,
-          leverage: event.leverage,
-          entryPrice: event.entryPrice,
-          underlyingPrice: event.underlyingPrice,
-        });
+        if (
+          event.type !== STATUS.Close &&
+          event.type !== STATUS.Liq &&
+          event.type !== STATUS.None
+        ) {
+          recent.push({
+            type: event.type,
+            timestamp: event.timestamp,
+            size: event.size,
+            leverage: event.leverage,
+            entryPrice: event.entryPrice,
+            underlyingPrice: event.underlyingPrice,
+          });
+        }
       }
     }
   }
