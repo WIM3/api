@@ -21,7 +21,7 @@ import { savePosition } from "../model/positions";
 
 let positions = new Map<string, Omit<DbPosition, "key">>();
 
-const getPositionsFromSubgraph = async (): Promise<SubPosition[]> => {
+const getPositionsFromSubgraph = async (ts: number): Promise<SubPosition[]> => {
   let subPositions: SubPosition[] = [];
   let last = "";
 
@@ -50,7 +50,7 @@ const getPositionsFromSubgraph = async (): Promise<SubPosition[]> => {
                 liquidationPenalty
                 fundingPayment
                 totalPnlAmount
-                positionChanges (first: ${SUBGRAPH_LIMIT}, orderBy: timestamp) {
+                positionChanges (first: ${SUBGRAPH_LIMIT}, orderBy: timestamp, where: { timestamp_gt: ${ts} }) {
                   timestamp
                   margin
                   notional
@@ -67,7 +67,7 @@ const getPositionsFromSubgraph = async (): Promise<SubPosition[]> => {
                   entryPrice
                   underlyingPrice
                 }
-                marginChanges (first: ${SUBGRAPH_LIMIT}, orderBy: timestamp) {
+                marginChanges (first: ${SUBGRAPH_LIMIT}, orderBy: timestamp, where: { timestamp_gt: ${ts} }) {
                   timestamp
                   amount
                   fundingPayment
@@ -183,9 +183,10 @@ export const getRecentPositionsByAmm = (amm: string): HistoryEvent[] => {
 export const run = async (positionsFromDb: Map<string, Omit<DbPosition, "key">>) => {
   // initializing positions from DB so that it does not need to start over
   positions = positionsFromDb;
+  let lastUpdateTs = 0;
 
   while (true) {
-    const subPositions = await getPositionsFromSubgraph().catch((e) => {
+    const subPositions = await getPositionsFromSubgraph(lastUpdateTs).catch((e) => {
       logger.error(e);
     });
 
@@ -197,7 +198,7 @@ export const run = async (positionsFromDb: Map<string, Omit<DbPosition, "key">>)
         const { id, positionChanges, marginChanges, ...newPosition } = subPosition;
 
         // if they are exactly the same based on their timestamp, we can skip
-        if (old && newPosition.timestamp === old.position.timestamp) continue;
+        if (old && newPosition.timestamp <= old.position.timestamp) continue;
 
         // processing of position related events
         let oldPositionSize = old ? old.position.size : "0";
@@ -252,6 +253,8 @@ export const run = async (positionsFromDb: Map<string, Omit<DbPosition, "key">>)
             logger.error(e);
           }
         );
+
+        if (lastUpdateTs < newPosition.timestamp) lastUpdateTs = newPosition.timestamp;
       }
     }
 

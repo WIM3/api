@@ -8,7 +8,7 @@ import { savePriceFeed } from "../model/prices";
 
 let priceFeeds = new Map<string, Omit<DbPriceFeed, "key">>();
 
-const getPriceFeedsFromSubgraph = async (): Promise<SubPriceFeed[]> => {
+const getPriceFeedsFromSubgraph = async (ts: number): Promise<SubPriceFeed[]> => {
   let subPriceFeeds: SubPriceFeed[] = [];
   let last = "";
 
@@ -23,7 +23,7 @@ const getPriceFeedsFromSubgraph = async (): Promise<SubPriceFeed[]> => {
                 id
                 timestamp
                 price
-                updates (first: ${SUBGRAPH_LIMIT}, orderBy: timestamp) {
+                updates (first: ${SUBGRAPH_LIMIT}, orderBy: timestamp, where: { timestamp_gt: ${ts} }) {
                   timestamp
                   price
                 }
@@ -73,9 +73,10 @@ export const getSpecificPriceFeed = (feedKey: string): Omit<DbPriceFeed, "key"> 
 export const run = async (priceFeedsFromDb: Map<string, Omit<DbPriceFeed, "key">>) => {
   // initializing prices from DB so that it does not need to start over
   priceFeeds = priceFeedsFromDb;
+  let lastUpdateTs = 0;
 
   while (true) {
-    const subPriceFeeds = await getPriceFeedsFromSubgraph().catch((e) => {
+    const subPriceFeeds = await getPriceFeedsFromSubgraph(lastUpdateTs).catch((e) => {
       logger.error(e);
     });
 
@@ -88,7 +89,7 @@ export const run = async (priceFeedsFromDb: Map<string, Omit<DbPriceFeed, "key">
 
         // if they are exactly the same based on their timestamp, we can skip
         const latest = old ? old.history[old.history.length - 1].timestamp : 0;
-        if (old && newPriceFeed.timestamp === latest) continue;
+        if (old && newPriceFeed.timestamp <= latest) continue;
 
         // processing of price feed related updates
         const priceUpdates = getNewUpdates(subPriceFeed.updates, latest);
@@ -100,6 +101,8 @@ export const run = async (priceFeedsFromDb: Map<string, Omit<DbPriceFeed, "key">
         savePriceFeed({ key: subPriceFeed.id, history }).catch((e) => {
           logger.error(e);
         });
+
+        if (lastUpdateTs < newPriceFeed.timestamp) lastUpdateTs = newPriceFeed.timestamp;
       }
     }
 
