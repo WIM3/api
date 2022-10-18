@@ -29,6 +29,8 @@ const getAmmsFromSubgraph = async (): Promise<Amm[]> => {
                 tradeLimitRatio
                 tradingVolume
                 underlyingPrice
+                baseAssetReserve
+                quoteAssetReserve
               }
             }`,
         },

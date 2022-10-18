@@ -15,6 +15,8 @@ export interface Amm {
   tradeLimitRatio: string;
   tradingVolume: string;
   underlyingPrice: string;
+  baseAssetReserve: string;
+  quoteAssetReserve: string;
   dataFeedId?: string;
   price?: number;
   nextFunding?: number;
