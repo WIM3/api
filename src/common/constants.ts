@@ -36,10 +36,10 @@ export const PROVIDER =
 export const PRICE_SUBGRAPH =
   EVM === "prod"
     ? "TODO"
-    : "https://api.thegraph.com/subgraphs/name/infinix-finance/dev-fuji-prices";
+    : "https://api.thegraph.com/subgraphs/name/hehe100596/dev-fuji-traders-island-prices";
 export const POSITION_SUBGRAPH =
   EVM === "prod"
     ? "TODO"
-    : "https://api.thegraph.com/subgraphs/name/infinix-finance/dev-fuji-positions";
+    : "https://api.thegraph.com/subgraphs/name/hehe100596/dev-fuji-traders-island-pos";
 export const API3_PRICE_FEED =
   EVM === "prod" ? "TODO" : "0xdC91ea613247C0C9438A6F64Cc0E08291198981a";
