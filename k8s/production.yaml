@@ -21,7 +21,7 @@ service:
 ingress:
   tls: false
   enabled: true
-  host: api.infinix.finance
+  host: api.traders-island
   path: "/"
 
 resources:
