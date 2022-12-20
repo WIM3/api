@@ -34,12 +34,10 @@ export const PROVIDER =
         `https://avalanche-fuji.infura.io/v3/${process.env.PROVIDER_KEY}`
       );
 export const PRICE_SUBGRAPH =
-  EVM === "prod"
-    ? "TODO"
-    : "https://api.thegraph.com/subgraphs/name/hehe100596/dev-fuji-traders-island-prices";
+  EVM === "prod" ? "TODO" : "https://api.thegraph.com/subgraphs/name/wim3/dev-fuji-traders-prices";
 export const POSITION_SUBGRAPH =
   EVM === "prod"
     ? "TODO"
-    : "https://api.thegraph.com/subgraphs/name/hehe100596/dev-fuji-traders-island-pos";
+    : "https://api.thegraph.com/subgraphs/name/wim3/dev-fuji-traders-positions";
 export const API3_PRICE_FEED =
   EVM === "prod" ? "TODO" : "0xdC91ea613247C0C9438A6F64Cc0E08291198981a";
