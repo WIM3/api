@@ -73,6 +73,7 @@ jobs:
           CHART_NAME: dev-chart
           PROVIDER: ${{ secrets.DEV_PROVIDER }}
         run: |
+          helm plugin install https://github.com/hydeenoble/helm-subenv.git
           aws eks update-kubeconfig --name $STAGE_KUBE_CLUSTER_NAME
           helm subenv -f ./k8s/dev.yaml
           helm repo add $CHART_NAME $STAGE_CHART_REGISTRY
