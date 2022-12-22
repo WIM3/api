@@ -19,9 +19,8 @@ service:
   port: 80
 
 ingress:
-  tls: false
   enabled: true
-  host: api-dev.infinix.finance
+  host: api-dev.web3islandmakers.com
   path: "/"
 
 resources:
