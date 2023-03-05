@@ -1,4 +1,5 @@
 import { Server, Socket } from "socket.io";
+import AWS from "aws-sdk";
 import * as dynamoose from "dynamoose";
 
 import { logger } from "./common/logger";
@@ -20,10 +21,21 @@ import {
 /* Initial setup */
 
 // setting up dynamo db instance
-const ddb = new dynamoose.aws.sdk.DynamoDB(
-  EVM === "local" ? AWS_CONFIG : { region: AWS_CONFIG.region }
-);
-dynamoose.aws.ddb.set(ddb);
+if (EVM !== "local") {
+  const ddb = new dynamoose.aws.sdk.DynamoDB(
+    AWS_CONFIG.accessKeyId && AWS_CONFIG.secretAccessKey
+      ? AWS_CONFIG
+      : { region: AWS_CONFIG.region }
+  );
+  dynamoose.aws.ddb.set(ddb);
+} else {
+  AWS.config.update({
+    region: AWS_CONFIG.region,
+    accessKeyId: "fakeId",
+    secretAccessKey: "fakeSecret",
+  });
+  dynamoose.aws.ddb.local();
+}
 
 // setting up socket io server
 const io = new Server({ cors: { origin: "*" } });
