@@ -11,9 +11,9 @@ env:
   STAGE_KUBE_CLUSTER_NAME: ${{ secrets.STAGE_KUBE_CLUSTER_NAME }}
   # PRODUCTION_KUBE_CLUSTER_NAME: ${{ secrets.PRODUCTION_KUBE_CLUSTER_NAME }}
   KUBE_NAMSPACE: "dev"
-  STAGE_CHART_REGISTRY: "s3://wim3.chart/dev"
+  STAGE_CHART_REGISTRY: "s3://tradersisland.chart/dev"
   # PRODUCTION_CHART_REGISTRY: ${{ secrets.PRODUCTION_CHART_REGISTRY }}
-  ECR_REPOSITORY: wim3/api
+  ECR_REPOSITORY: tradersisland/api
   DEPLOYMENT_NAME: "api"
 
 jobs:
