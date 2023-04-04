@@ -81,8 +81,8 @@ jobs:
           helm subenv -f ./k8s/dev.yaml
           helm repo add $CHART_NAME $STAGE_CHART_REGISTRY
           helm repo update $CHART_NAME
-          helm template $DEPLOYMENT_NAME $CHART_NAME/wim3 -n $KUBE_NAMSPACE -f ./k8s/dev.yaml
-          helm upgrade -i $DEPLOYMENT_NAME $CHART_NAME/wim3 -n $KUBE_NAMSPACE -f ./k8s/dev.yaml
+          helm template $DEPLOYMENT_NAME $CHART_NAME/tradersisland -n $KUBE_NAMSPACE -f ./k8s/dev.yaml
+          helm upgrade -i $DEPLOYMENT_NAME $CHART_NAME/tradersisland -n $KUBE_NAMSPACE -f ./k8s/dev.yaml
 
       # - name: Deploy - PRODUCTION
       #   if: ${{ github.ref == 'refs/heads/master' }}
@@ -95,5 +95,5 @@ jobs:
       #     helm subenv -f ./k8s/production.yaml
       #     helm repo add $CHART_NAME $PRODUCTION_CHART_REGISTRY
       #     helm repo update $CHART_NAME
-      #     helm template $DEPLOYMENT_NAME $CHART_NAME/advancedblockchain -n $KUBE_NAMSPACE -f ./k8s/production.yaml
-      #     helm upgrade -i $DEPLOYMENT_NAME $CHART_NAME/advancedblockchain -n $KUBE_NAMSPACE -f ./k8s/production.yaml
+      #     helm template $DEPLOYMENT_NAME $CHART_NAME/tradersisland -n $KUBE_NAMSPACE -f ./k8s/production.yaml
+      #     helm upgrade -i $DEPLOYMENT_NAME $CHART_NAME/tradersisland -n $KUBE_NAMSPACE -f ./k8s/production.yaml
